@@ -1,4 +1,4 @@
-# play-rest-support [![Build Status](https://travis-ci.org/agiledigital/play-rest-support.svg?branch=master)](https://travis-ci.org/agiledigital/play-rest-support[![Coverage Status](https://coveralls.io/repos/github/agiledigital/play-rest-support/badge.svg?branch=master)](https://coveralls.io/github/agiledigital/play-rest-support?branch=master)
+# play-rest-support [![Build Status](https://travis-ci.org/agiledigital/play-rest-support.svg?branch=master)](https://travis-ci.org/agiledigital/play-rest-support)[![Coverage Status](https://coveralls.io/repos/github/agiledigital/play-rest-support/badge.svg?branch=master)](https://coveralls.io/github/agiledigital/play-rest-support?branch=master)
 
 Supports creation of RESTful APIs in the Play 2 Framework. Requires Play 2.5.
 ## Usage
