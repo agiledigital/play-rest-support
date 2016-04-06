@@ -83,7 +83,7 @@ lazy val root = (project in file(".")).
 lazy val core = (project in file("core")).
   settings(commonSettings: _*).
   settings(
-    name := "play-rest-support-extensions"
+    name := "play-rest-support"
   )
 
 lazy val coreTests = (project in file("core-tests")).

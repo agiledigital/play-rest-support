@@ -26,11 +26,12 @@ object EnumerationFormat {
           Try {
             JsSuccess(e.withName(name))
           } recover {
-            case nse: NoSuchElementException => JsError(s"""Unknown $className [$name], accepted values are [${e.values.mkString(",")}].""")
+            case nse: NoSuchElementException =>
+              JsError(s"""Unknown $className [$name], accepted values are [${e.values.mkString(",")}].""")
           } getOrElse {
             JsError(s"""Unknown $className [$name], accepted values are [${e.values.mkString(",")}].""")
           }
-        case u => JsError(s"$className should be a JsString, got a [$u].")
+        case u => JsError(s"Input for $className should be a JsString, got a [${u.getClass}] - [$u].")
       }
     }
   }
