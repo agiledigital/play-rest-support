@@ -29,7 +29,6 @@ lazy val commonSettings = Seq(
   ),
   // Disable scaladoc generation in dist.
   sources in(Compile, doc) := Seq.empty,
-  publishArtifact in(Compile, packageDoc) := false,
   updateOptions := updateOptions.value.withCachedResolution(true),
   // Restrict resources that will be used.
   concurrentRestrictions in Global := Seq(
@@ -40,16 +39,8 @@ lazy val commonSettings = Seq(
   compileScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Compile).toTask("").value,
   (test in Test) <<= (test in Test) dependsOn compileScalastyle,
   // To publish, put these credentials in ~/.ivy2/credentials
-  //credentials += Credentials("Sonatype Nexus Repository Manager", "publish-nexus.agiledigital.com.au", "****", "****"),
+  //credentials += Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", "****", "****"),
   credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
-  publishTo := {
-    val nexus = "http://publish-nexus.agiledigital.com.au/nexus/"
-    if (version.value.trim.endsWith("SNAPSHOT")) {
-      Some("snapshots" at nexus + "content/repositories/snapshots")
-    } else {
-      Some("releases" at nexus + "content/repositories/releases")
-    }
-  },
   wartremoverErrors in (Compile, compile) ++= Seq(
         Wart.FinalCaseClass,
         Wart.Null,
