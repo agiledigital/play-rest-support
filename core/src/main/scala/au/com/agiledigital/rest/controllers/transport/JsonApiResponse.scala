@@ -20,10 +20,13 @@ import scala.language.implicitConversions
 import scalaz.{-\/, \/, \/-}
 
 /**
- * Encapsulates a response T and any messages that were produced while
+ * Encapsulates an optional result T and any messages that were produced while
  * processing the request that produced T.
  */
-final case class JsonApiResponse[T](result: Option[T], messages: Message*)
+final case class JsonApiResponse[T](result: Option[T], messages: Seq[Message]) {
+  def withMessage(message: Message): JsonApiResponse[T] = copy(messages = messages :+ message)
+}
+
 
 /**
  * The severity (level) of messages that can be produced whilst processing an API request.
@@ -50,6 +53,9 @@ object MessageLevel extends Enumeration {
  * Companion object for ApiResponse that contains JSON serialisation.
  */
 object JsonApiResponse {
+
+  def apply[T](result: Option[T], message: Message): JsonApiResponse[T] = JsonApiResponse(result, Seq(message))
+
   implicit def responseContainerWrites[T](implicit fmt: Writes[T]): Writes[JsonApiResponse[T]] = new Writes[JsonApiResponse[T]] {
 
     /**
@@ -65,7 +71,7 @@ object JsonApiResponse {
   implicit def responseContainerReads[T](implicit reads: Reads[T]): Reads[JsonApiResponse[T]] = (
     (JsPath \ "result").readNullable[T](reads) and
     (JsPath \ "messages").read[Seq[Message]]
-  )((result, messages) => JsonApiResponse(result, messages:_*))
+  )((result, messages) => JsonApiResponse(result, messages))
 
   /**
    * Builds a response with the supplied message and result.
@@ -126,7 +132,7 @@ object JsonApiResponse {
     errorOrResponse match {
       case Left(errorMessages) =>
         val errors = errorMessages.map(errorMessage => Message(errorMessage, MessageLevel.Error))
-        BadRequest(Json.toJson(JsonApiResponse[String](None, errors.toSeq: _*)))
+        BadRequest(Json.toJson(JsonApiResponse[String](None, errors.toSeq)))
       case Right(successObject) => Ok(Json.toJson(JsonApiResponse(Some(successObject), Message(successMessage))))
     }
   }
@@ -202,7 +208,7 @@ object JsonApiResponse {
    * @return A 400 'Bad Result' Successful Future
    */
   def badRequestApiResponse(message: String, errors: Seq[(JsPath, Seq[ValidationError])]): Future[Result] = {
-    Future.successful(JsonApiResponse.badRequestResponse(message, errors))
+    Future.successful(badRequestResponse(message, errors))
   }
 
   /**
@@ -253,8 +259,15 @@ object JsonApiResponse {
 
 /**
  * A message that was produced while processing a request.
+ *
+ * @param message the human readable message.
+ * @param level the message level.
+ * @param context the segment of the request JSON that produced this message.
+ * @param code the code that can be used to: retrieve documentation for the message; and, allow the API consumer to
+ *             react to the message in a structured way.
+ *
  */
-final case class Message(message: String, level: MessageLevel = MessageLevel.Info, context: JsObject = JsObject(Seq()))
+final case class Message(message: String, level: MessageLevel = MessageLevel.Info, context: JsObject = JsObject(Seq()), code: Option[Int] = None)
 
 /**
  * Companion object for Message that contains JSON serialisation of the message and its severity.
