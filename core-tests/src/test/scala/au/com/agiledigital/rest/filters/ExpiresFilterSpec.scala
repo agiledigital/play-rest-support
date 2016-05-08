@@ -4,26 +4,25 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import au.com.agiledigital.rest.tests.{ BaseSpec}
+import au.com.agiledigital.rest.tests.{ BaseSpec }
 import com.sun.jna.platform.win32.Guid.GUID
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.matcher.DataTables
 import org.specs2.specification.After
-import play.api.mvc.{RequestHeader, Result, Results}
+import play.api.mvc.{ RequestHeader, Result, Results }
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{ Await, Future }
 import scala.language.postfixOps
 
-
 /**
- * Contains tests for the [[ExpiresFilter]].
- */
+  * Contains tests for the [[ExpiresFilter]].
+  */
 class ExpiresFilterSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTables {
 
   "Filtering a result" should {
-    // @formatter:off
+    // format: OFF
     "add headers as expected" ||
       "description"                   || "status"     || "headers"                             || "expected headers"  |>
       "200, no headers"               !! OK           !! emptyInputHeaders                     !! resultHeadersWithExpiry  |
@@ -34,29 +33,28 @@ class ExpiresFilterSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTab
       "200, cache-control and random" !! OK           !! inputHeadersWithCacheControlAndRandom !! emptyResultHeaders  + (CACHE_CONTROL -> "no-cache") + ("some_header" -> "some_header_value") |
       "200, expires header"           !! OK           !! inputHeadersWithExpiry                !! emptyResultHeaders + (EXPIRES -> "1000") |> {
        (outerDescription, outerResultStatus, outerResultHeaders, outerExpectedHeaders) => new WithActorSystem {
-        // @formatter:on
-         val description = outerDescription
-         val resultStatus = outerResultStatus
-         val resultHeaders = outerResultHeaders
-         val expectedHeaders = outerExpectedHeaders
+            // format: ON
+            val description = outerDescription
+            val resultStatus = outerResultStatus
+            val resultHeaders = outerResultHeaders
+            val expectedHeaders = outerExpectedHeaders
 
+            // Given a handler that returns the supplied status and headers
+            val handler: (RequestHeader) => Future[Result] = _ => Future.successful(
+              Results.Status(resultStatus).withHeaders(resultHeaders: _*)
+            )
 
-         // Given a handler that returns the supplied status and headers
-         val handler: (RequestHeader) => Future[Result] = _ => Future.successful(
-           Results.Status(resultStatus).withHeaders(resultHeaders: _*)
-         )
+            // When the filter is called.
+            val filter = new ExpiresFilter()(ActorMaterializer.create(system), ev.executionContext)
+            val actual = filter(handler)(FakeRequest("get", "something"))
 
-         // When the filter is called.
-         val filter = new ExpiresFilter()(ActorMaterializer.create(system), ev.executionContext)
-         val actual = filter(handler)(FakeRequest("get", "something"))
+            // Then the status should have been returned unchanged.
+            status(actual) must_== resultStatus
 
-         // Then the status should have been returned unchanged.
-         status(actual) must_== resultStatus
-
-         // And the headers should match the expected ones.
-         headers(actual) must_== expectedHeaders
-       }
-    }
+            // And the headers should match the expected ones.
+            headers(actual) must_== expectedHeaders
+          }
+      }
   }
 
   val emptyInputHeaders = Seq[(String, String)]()

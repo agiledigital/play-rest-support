@@ -13,7 +13,7 @@ import scala.concurrent.duration.FiniteDuration
   */
 trait CacheableResponses {
 
-   /**
+  /**
     * Builds a wrapper action around the supplied action that sets the cache headers to effect the requested degree
     * of caching. Only adds the cache headers if an OK status is set by the wrapped action.
     *
@@ -25,22 +25,22 @@ trait CacheableResponses {
     * @tparam A type of request processed by the wrapped action.
     * @return a wrapper around the supplied response that will set the cache headers.
     */
-   def cacheable[A](duration: FiniteDuration)(action: Action[A])(implicit ec: ExecutionContext): Action[A] =
-     Action.async(action.parser) { request =>
-       action(request) map { response =>
-         if (statusCodesToSet.contains(response.header.status)) {
-           response.withHeaders(
-             EXPIRES -> (DateTimeUtils.currentTimeMillis() + duration.toMillis).toString,
-             CACHE_CONTROL -> s"max-age=${duration.toSeconds.toString}"
-           )
-         }
-         else {
-           response
-         }
-       }
-     }
+  def cacheable[A](duration: FiniteDuration)(action: Action[A])(implicit ec: ExecutionContext): Action[A] =
+    Action.async(action.parser) { request =>
+      action(request) map { response =>
+        if (statusCodesToSet.contains(response.header.status)) {
+          response.withHeaders(
+            EXPIRES -> (DateTimeUtils.currentTimeMillis() + duration.toMillis).toString,
+            CACHE_CONTROL -> s"max-age=${duration.toSeconds.toString}"
+          )
+        }
+        else {
+          response
+        }
+      }
+    }
 
-   /** The result status codes that must be returned from the underlying action for the filter to be applied. */
-   private val statusCodesToSet = Set(OK)
+  /** The result status codes that must be returned from the underlying action for the filter to be applied. */
+  private val statusCodesToSet = Set(OK)
 
- }
+}

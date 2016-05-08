@@ -2,11 +2,11 @@ package au.com.agiledigital.rest.controllers.transport
 
 import java.security.cert.X509Certificate
 
-import play.api.mvc.{Headers, RequestHeader}
+import play.api.mvc.{ Headers, RequestHeader }
 
 /**
- * Empty request header implementation.
- */
+  * Empty request header implementation.
+  */
 class EmptyRequestHeader extends RequestHeader {
 
   override def id: Long = 1L
