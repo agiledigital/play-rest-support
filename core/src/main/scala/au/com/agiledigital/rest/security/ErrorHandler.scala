@@ -5,25 +5,27 @@ import javax.inject._
 import au.com.agiledigital.rest.controllers.transport.JsonApiResponse
 import play.api._
 import play.api.http.Status._
-import play.api.http.{DefaultHttpErrorHandler, MimeTypes}
+import play.api.http.{ DefaultHttpErrorHandler, MimeTypes }
 import play.api.mvc._
 import play.api.routing.Router
 
 import scala.concurrent._
 
 /**
- * Provides JSON error responses when the requestor accepts JSON. If the requestor does not accept a JSON response,
- * defers handling back to the [[DefaultHttpErrorHandler]].
- *
- * @param env the environment of the application (chiefly, whether it is in DEV or PROD mode).
- * @param config the application's configuration.
- * @param sourceMapper the source mapper.
- * @param router the router provider.
- */
-class ErrorHandler @Inject()(env: Environment,
-                             config: Configuration,
-                             sourceMapper: OptionalSourceMapper,
-                             router: Provider[Router]) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) {
+  * Provides JSON error responses when the requestor accepts JSON. If the requestor does not accept a JSON response,
+  * defers handling back to the [[DefaultHttpErrorHandler]].
+  *
+  * @param env the environment of the application (chiefly, whether it is in DEV or PROD mode).
+  * @param config the application's configuration.
+  * @param sourceMapper the source mapper.
+  * @param router the router provider.
+  */
+class ErrorHandler @Inject() (
+  env: Environment,
+    config: Configuration,
+    sourceMapper: OptionalSourceMapper,
+    router: Provider[Router]
+) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) {
 
   override def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] = {
     if (isJsonRequest(request)) {

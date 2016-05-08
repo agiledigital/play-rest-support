@@ -9,7 +9,7 @@ import org.specs2.matcher.DataTables
   */
 class HtmlWhitelistFilterSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTables {
   "HtmlWhitelistFilter remove unsafe" should {
-    // @formatter:off
+    // format: OFF
     "remove unsafe HTML tags from the input string" ||
       "description"                             || "input string"                      || "expected"                                                 |>
       "leave non-HTML strings alone"            !! "This is a string"                  !! "This is a string"                                         |
@@ -19,22 +19,22 @@ class HtmlWhitelistFilterSpec(implicit ev: ExecutionEnv) extends BaseSpec with D
       "remove DIV tag"                          !! "<div>This is a div</div>"          !! "This is a div"                                            |
       "allow anchor attributes"                 !! "<a title=\"test\" target=\"new\">" !! "<a title=\"test\" target=\"new\" rel=\"nofollow\"></a>"   |>{
       (description, inputString, expected) => {
-        // @formatter:on
-        HtmlWhitelistFilter.removeUnsafe(inputString) must beEqualTo(expected)
+            // format: ON
+            HtmlWhitelistFilter.removeUnsafe(inputString) must beEqualTo(expected)
+          }
       }
-    }
   }
 
   "HtmlWhitelistFilter remove all" should {
-    // @formatter:off
+    // format: OFF
     "remove all HTML tags from the input string" ||
       "description"                  || "input string"               || "expected"                    |>
       "leave non-HTML strings alone" !! "<p>This is a string</p>"    !! "This is a string"            |
       "remove any HTML tags"         !! "<p></p><img><b></b><a></a>" !! ""                            |>{
       (description, inputString, expected) => {
-        // @formatter:on
-        HtmlWhitelistFilter.removeAll(inputString) must beEqualTo(expected)
+            // format: ON
+            HtmlWhitelistFilter.removeAll(inputString) must beEqualTo(expected)
+          }
       }
-    }
   }
 }

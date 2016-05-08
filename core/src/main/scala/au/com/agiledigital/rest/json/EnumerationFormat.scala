@@ -7,13 +7,13 @@ import play.api.libs.json._
 import scala.util.Try
 
 /**
- * Creates JSON Formats for Enumerations.
- */
+  * Creates JSON Formats for Enumerations.
+  */
 object EnumerationFormat {
   /**
-   * Creates JSON Formats for scala Enumerations.
-   * @return The JSON Format for the given Enumerations.
-   */
+    * Creates JSON Formats for scala Enumerations.
+    * @return The JSON Format for the given Enumerations.
+    */
   def format[A <: Enumeration](e: A): Format[A#Value] = {
     new Format[A#Value] {
 

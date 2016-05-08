@@ -56,7 +56,7 @@ lazy val commonSettings = Seq(
         Wart.Return,
         Wart.AsInstanceOf,
         Wart.IsInstanceOf)
-)
+) ++ Formatting.formattingSettings
 
 lazy val root = (project in file(".")).
   settings(commonSettings:_*).

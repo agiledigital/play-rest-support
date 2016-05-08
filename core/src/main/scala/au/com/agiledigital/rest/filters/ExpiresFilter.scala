@@ -5,20 +5,20 @@ import javax.inject.Inject
 import akka.stream.Materializer
 import play.api.http.HeaderNames._
 import play.api.http.Status._
-import play.api.mvc.{Filter, RequestHeader, Result}
+import play.api.mvc.{ Filter, RequestHeader, Result }
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 /**
- * Filters responses by adding an expires -> "-1" header if none of:
- * # last-modified
- * # cache-control
- * # expires
- * have been set and the status is 200.
- *
- * @param ec the execution context that is used to map the response from the underlying action.
- */
-class ExpiresFilter @Inject()(implicit val mat: Materializer, val ec: ExecutionContext) extends Filter {
+  * Filters responses by adding an expires -> "-1" header if none of:
+  * # last-modified
+  * # cache-control
+  * # expires
+  * have been set and the status is 200.
+  *
+  * @param ec the execution context that is used to map the response from the underlying action.
+  */
+class ExpiresFilter @Inject() (implicit val mat: Materializer, val ec: ExecutionContext) extends Filter {
   override def apply(nextFilter: (RequestHeader) => Future[Result])(requestHeader: RequestHeader): Future[Result] = {
     nextFilter(requestHeader) map { result =>
       if (statusCodesToSet.contains(result.header.status)) {
