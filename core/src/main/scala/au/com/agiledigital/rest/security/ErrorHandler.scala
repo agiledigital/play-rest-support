@@ -2,14 +2,14 @@ package au.com.agiledigital.rest.security
 
 import javax.inject._
 
-import au.com.agiledigital.rest.controllers.transport.JsonApiResponse
+import au.com.agiledigital.rest.controllers.transport.{ MessageLevel, Message, JsonApiResponse }
 import play.api._
-import play.api.http.Status._
-import play.api.http.{ DefaultHttpErrorHandler, MimeTypes }
+import play.api.http.{ Writeable, DefaultHttpErrorHandler, MimeTypes }
+import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc._
 import play.api.routing.Router
 
-import scala.concurrent._
+import scala.concurrent.{ Future, ExecutionContext }
 
 /**
   * Provides JSON error responses when the requestor accepts JSON. If the requestor does not accept a JSON response,
@@ -21,20 +21,17 @@ import scala.concurrent._
   * @param router the router provider.
   */
 class ErrorHandler @Inject() (
-  env: Environment,
+    env: Environment,
     config: Configuration,
     sourceMapper: OptionalSourceMapper,
     router: Provider[Router]
-) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) {
+)(implicit val ec: ExecutionContext) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) {
 
   override def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] = {
     if (isJsonRequest(request)) {
-      statusCode match {
-        case BAD_REQUEST => JsonApiResponse.badRequestApiResponse(message, Nil)
-        case FORBIDDEN => Future.successful(JsonApiResponse.forbiddenResponse(message))
-        case NOT_FOUND => Future.successful(JsonApiResponse.notFoundResponse(message))
-        case clientError if statusCode >= 400 && statusCode < 500 => JsonApiResponse.badRequestApiResponse(message, Nil)
-        case _ => super.onClientError(request, statusCode, message)
+      super.onClientError(request, statusCode, message).map { result =>
+        val writeable: Writeable[JsValue] = implicitly[Writeable[JsValue]]
+        Result(result.header, writeable.toEntity(Json.toJson(JsonApiResponse[String](None, Message(message, MessageLevel.Error)))))
       }
     }
     else {
