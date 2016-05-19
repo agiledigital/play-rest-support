@@ -6,7 +6,7 @@ Supports creation of RESTful APIs in the Play 2 Framework. Requires Play 2.5.
 Add library as a dependency:
 
 ```scala
-"au.com.agiledigital" %% "play-rest-support" % "0.0.1"
+"au.com.agiledigital" %% "play-rest-support" % "0.0.2"
 ```
 
 ## Testing
@@ -14,5 +14,5 @@ Add library as a dependency:
 The testkit provides some helpers for testing Play2 application. To use:
 
 ```scala
-"au.com.agiledigital" %% "play-rest-support-testkit" % "0.0.1" % Test
+"au.com.agiledigital" %% "play-rest-support-testkit" % "0.0.2" % Test
 ```
