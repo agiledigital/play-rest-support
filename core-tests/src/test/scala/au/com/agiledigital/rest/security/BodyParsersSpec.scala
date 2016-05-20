@@ -50,7 +50,6 @@ class BodyParsersSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTable
       )
     )
 
-    // @formatter:off
     // format: OFF
     "clean JSON values using the specified HTML whitelist" ||
       "description"                       || "json"               || "expected clean all" || "expected clean unsafe"          |>
@@ -62,7 +61,6 @@ class BodyParsersSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTable
       "leave JSON null alone"             !! JsNull               !! JsNull               !! JsNull                           |
       "leave JSON bools alone"            !! JsBoolean(false)     !! JsBoolean(false)     !! JsBoolean(false)                 |> {
       (description, json, expectedCleanAll, expectedUnsafe) => {
-            // @formatter:on
             // format: ON
             BodyParsers.clean(json) must beEqualTo(expectedCleanAll)
 
@@ -71,9 +69,9 @@ class BodyParsersSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTable
       }
   }
 
-  "BodyParsers whitelistingJson" should {
+  "Parsing JSON to value with specific type after applying a full clean white listing filter" should {
 
-    // Given a fake action that uses the whitelistingJson body parser.
+    // Given a fake action that uses the whitelistingJson body parser with type MockTestModel.
     def fakeAction: Action[MockTestModel] = Action(BodyParsers.whitelistingJson[MockTestModel]) { request =>
       Ok(Json.toJson(request.body))
     }
@@ -104,7 +102,29 @@ class BodyParsersSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTable
     }
   }
 
-  "BodyParsers whitelisitngJsonUnSafe" should {
+  "Applying a full clean white listing filter to a JSON body" should {
+
+    // Given a fake action that uses the whitelistingJson body parser.
+    def fakeAction: Action[JsValue] = Action(BodyParsers.whitelistingJson) { request =>
+      Ok(request.body)
+    }
+
+    "clean the JSON values" in new WithApplication {
+      // And a request with a JSON body with HTML tags.
+      val request = FakeRequest().withBody(Json.parse("""{"name": "<script>Hack</script><span>safe</span>"}"""))
+
+      // When calling the fake action with the request.
+      val result = call(fakeAction, request)
+
+      // Then the response content must have the JSON body cleaned.
+      contentAsString(result)(defaultTimeout) must_=== """{"name":"safe","nameUnsafe":"<script>Hack</script><span>safe</span>"}"""
+
+      // And the status is 200 OK.
+      status(result)(defaultTimeout) must_=== OK
+    }
+  }
+
+  "Parsing JSON to value with specific type after applying an unsafe white listing filter" should {
 
     // Given a fake action that uses the whitelistingJsonUnSafe body parser.
     def fakeAction: Action[MockTestModel] = Action(BodyParsers.whitelistingJsonUnsafe[MockTestModel]) { request =>
@@ -136,9 +156,32 @@ class BodyParsersSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTable
       status(result)(defaultTimeout) must_=== BAD_REQUEST
     }
   }
+
+  "Applying unsafe white list to remove unsafe HTML tags from the JSON body" should {
+
+    // Given a fake action that uses the whitelistingJsonUnsafe body parser.
+    def fakeAction: Action[JsValue] = Action(BodyParsers.whitelistingJsonUnsafe) { request =>
+      Ok(request.body)
+    }
+
+    "clean the JSON values" in new WithApplication {
+      // And a request with a JSON body with HTML tags.
+      val request = FakeRequest().withBody(Json.parse("""{"name": "<script>Hack</script><span>safe</span>"}"""))
+
+      // When calling the fake action with the request.
+      val result = call(fakeAction, request)
+
+      // Then the response content must have the JSON body cleaned.
+      contentAsString(result)(defaultTimeout) must_=== """{"name":"<span>safe</span>","nameUnsafe":"<script>Hack</script><span>safe</span>"}"""
+
+      // And the status is 200 OK.
+      status(result)(defaultTimeout) must_=== OK
+    }
+  }
 }
 
 final case class MockTestModel(id: Int, name: String)
+
 object MockTestModel {
   implicit val jsonFormatter: Format[MockTestModel] = Json.format[MockTestModel]
 }
