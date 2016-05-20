@@ -6,8 +6,8 @@ import org.specs2.matcher.DataTables
 import play.api.libs.json._
 
 /**
- * Tests for [[BodyParsers]].
- */
+  * Tests for [[BodyParsers]].
+  */
 class BodyParsersSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTables {
   "BodyParsers clean" should {
 
@@ -46,6 +46,7 @@ class BodyParsersSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTable
     )
 
     // @formatter:off
+    // format: OFF
     "clean JSON values using the specified HTML whitelist" ||
       "description"                       || "json"               || "expected clean all" || "expected clean unsafe"          |>
       "leave non-HTML strings alone"      !! JsString("bar baz")  !! JsString("bar baz")  !! JsString("bar baz")              |
@@ -56,11 +57,12 @@ class BodyParsersSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTable
       "leave JSON null alone"             !! JsNull               !! JsNull               !! JsNull|
       "leave JSON bools alone"            !! JsBoolean(false)     !! JsBoolean(false)     !! JsBoolean(false)                 |> {
       (description, json, expectedCleanAll, expectedUnsafe) => {
-        // @formatter:on
-        BodyParsers.clean(json) must beEqualTo(expectedCleanAll)
+            // @formatter:on
+            // format: ON
+            BodyParsers.clean(json) must beEqualTo(expectedCleanAll)
 
-        BodyParsers.cleanUnsafe(json) must beEqualTo(expectedUnsafe)
+            BodyParsers.cleanUnsafe(json) must beEqualTo(expectedUnsafe)
+          }
       }
-    }
   }
 }
