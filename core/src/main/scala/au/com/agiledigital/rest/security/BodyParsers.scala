@@ -14,25 +14,25 @@ object BodyParsers {
   /**
     * A JSON body parser that applies HTML whitelisting rules to JSON strings and validate based on the type, this removes all HTML tags.
     */
-  def whitelistingJson[A](implicit executionContext: ExecutionContext, reader: Reads[A]): BodyParser[A] = parse.json map clean validate as[A]
+  def whitelistingJsonAs[A](includeUnsafe: Boolean)(implicit executionContext: ExecutionContext, reader: Reads[A]): BodyParser[A] = parse.json map (clean(_, includeUnsafe)) validate as[A]
 
   /**
     * A JSON body parser that applies HTML whitelisting rules to JSON strings, this removes all HTML tags.
     */
-  def whitelistingJson(implicit executionContext: ExecutionContext): BodyParser[JsValue] = parse.json map clean
+  def whitelistingJson(includeUnsafe: Boolean)(implicit executionContext: ExecutionContext): BodyParser[JsValue] = parse.json map (clean(_, includeUnsafe))
 
   /**
     * A JSON body parser that applies HTML whitelisting rules to JSON strings that allows a set of unsafe HTML characters to pass through.
     * It returns the cleaned and validated value.
     * It allows the HTML tags in basic set of [[org.jsoup.safety.Whitelist]].
     */
-  def whitelistingJsonUnsafe[A](implicit executionContext: ExecutionContext, reader: Reads[A]): BodyParser[A] = parse.json map cleanUnsafe validate as[A]
+  def whitelistingJsonUnsafeAs[A](includeUnsafe: Boolean)(implicit executionContext: ExecutionContext, reader: Reads[A]): BodyParser[A] = parse.json map (cleanUnsafe(_, includeUnsafe)) validate as[A]
 
   /**
     * A JSON body parser that applies HTML whitelisting rules to JSON strings that allows a set of unsafe HTML characters to pass through.
     * It allows the HTML tags in basic set of [[org.jsoup.safety.Whitelist]].
     */
-  def whitelistingJsonUnsafe(implicit executionContext: ExecutionContext): BodyParser[JsValue] = parse.json map cleanUnsafe
+  def whitelistingJsonUnsafe(includeUnsafe: Boolean)(implicit executionContext: ExecutionContext): BodyParser[JsValue] = parse.json map (cleanUnsafe(_, includeUnsafe))
 
   /**
     * Applies an unsafe HTML whitelist filter to a JsValue. If the JsValue is a JsString, all HTML elements are removed
@@ -41,7 +41,7 @@ object BodyParsers {
     * @param jsValue The JsValue to clean.
     * @return The JsValue after being cleaned using the empty HTML whitelist.
     */
-  def cleanUnsafe(jsValue: JsValue): JsValue = HtmlWhitelistFilter.applyFilter(jsValue, HtmlWhitelistFilter.removeUnsafe, includeUnsafe = true)
+  def cleanUnsafe(jsValue: JsValue, includeUnsafe: Boolean): JsValue = HtmlWhitelistFilter.applyFilter(jsValue, HtmlWhitelistFilter.removeUnsafe, includeUnsafe)
 
   /**
     * Applies an empty HTML whitelist filter to a JsValue. If the JsValue is a JsString, all HTML elements are removed
@@ -50,7 +50,7 @@ object BodyParsers {
     * @param jsValue The JsValue to clean.
     * @return The JsValue after being cleaned using the empty HTML whitelist.
     */
-  def clean(jsValue: JsValue): JsValue = HtmlWhitelistFilter.applyFilter(jsValue, HtmlWhitelistFilter.removeAll, includeUnsafe = true)
+  def clean(jsValue: JsValue, includeUnsafe: Boolean): JsValue = HtmlWhitelistFilter.applyFilter(jsValue, HtmlWhitelistFilter.removeAll, includeUnsafe)
 
   /**
     * Validates a specified Json based on given type.
