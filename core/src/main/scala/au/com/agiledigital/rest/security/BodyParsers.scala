@@ -39,6 +39,8 @@ object BodyParsers {
     * from the string. If the JsValue is a JsArray or JsObject, the whitelist is applied recursively. Also it will not include unsafe.
     * All other JsValue types are left untouched.
     * @param jsValue The JsValue to clean.
+    * @param includeUnsafe True if the original, unfiltered values should be included in new fields
+    *                      suffixed by "Unsafe", false otherwise.
     * @return The JsValue after being cleaned using the empty HTML whitelist.
     */
   def cleanUnsafe(jsValue: JsValue, includeUnsafe: Boolean): JsValue = HtmlWhitelistFilter.applyFilter(jsValue, HtmlWhitelistFilter.removeUnsafe, includeUnsafe)
@@ -48,6 +50,8 @@ object BodyParsers {
     * from the string. If the JsValue is a JsArray or JsObject, the whitelist is applied recursively.
     * All other JsValue types are left untouched.
     * @param jsValue The JsValue to clean.
+    * @param includeUnsafe True if the original, unfiltered values should be included in new fields
+    *                      suffixed by "Unsafe", false otherwise.
     * @return The JsValue after being cleaned using the empty HTML whitelist.
     */
   def clean(jsValue: JsValue, includeUnsafe: Boolean): JsValue = HtmlWhitelistFilter.applyFilter(jsValue, HtmlWhitelistFilter.removeAll, includeUnsafe)
