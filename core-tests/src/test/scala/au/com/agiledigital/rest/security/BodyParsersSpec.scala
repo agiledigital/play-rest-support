@@ -62,9 +62,9 @@ class BodyParsersSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTable
       "leave JSON bools alone"            !! JsBoolean(false)     !! JsBoolean(false)     !! JsBoolean(false)                 |> {
       (description, json, expectedCleanAll, expectedUnsafe) => {
             // format: ON
-            BodyParsers.clean(json) must beEqualTo(expectedCleanAll)
+            BodyParsers.clean(json, includeUnsafe = true) must beEqualTo(expectedCleanAll)
 
-            BodyParsers.cleanUnsafe(json) must beEqualTo(expectedUnsafe)
+            BodyParsers.cleanUnsafe(json, includeUnsafe = true) must beEqualTo(expectedUnsafe)
           }
       }
   }
@@ -72,7 +72,7 @@ class BodyParsersSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTable
   "Parsing JSON to value with specific type after applying a full clean white listing filter" should {
 
     // Given a fake action that uses the whitelistingJson body parser with type MockTestModel.
-    def fakeAction: Action[MockTestModel] = Action(BodyParsers.whitelistingJson[MockTestModel]) { request =>
+    def fakeAction: Action[MockTestModel] = Action(BodyParsers.whitelistingJsonAs[MockTestModel](includeUnsafe = true)) { request =>
       Ok(Json.toJson(request.body))
     }
 
@@ -100,12 +100,39 @@ class BodyParsersSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTable
       // Then the status is 400 Bad Request.
       status(result)(defaultTimeout) must_=== BAD_REQUEST
     }
+
+    // format: OFF
+    "cleaned JSON values with" in new WithApplication {
+      "description"                  || "json"                                                       || "include unsafe" || "expected cleaned JSON"                                                    |>
+        "unsafe field added"         !! Json.parse("""{"id": 1, "name": "<script>Hack</script>"}""") !! false            !! """{"id":1,"name":""}"""                                                   |
+        "no unsafe field added"      !! Json.parse("""{"id": 1, "name": "<script>Hack</script>"}""") !! true             !! """{"id":1,"name":"","idUnsafe":1,"nameUnsafe":"<script>Hack</script>"}""" |> {
+        (description, json, includeUnsafe, expectedCleanedJson) => {
+              // format: ON
+              // Given a fake action that uses the whitelistingJsonAs body parser.
+              def action: Action[JsValue] = Action(BodyParsers.whitelistingJsonAs[JsValue](includeUnsafe)) { request =>
+                Ok(Json.toJson(request.body))
+              }
+
+              // And a request with a JSON body with HTML tags.
+              val request = FakeRequest().withBody(json)
+
+              // When calling the fake action with the request.
+              val result = call(action, request)
+
+              // Then the response content must have the JSON body cleaned with expected result.
+              contentAsString(result)(defaultTimeout) must_=== expectedCleanedJson
+
+              // And the status is 200 OK.
+              status(result)(defaultTimeout) must_=== OK
+            }
+        }
+    }
   }
 
   "Applying a full clean white listing filter to a JSON body" should {
 
     // Given a fake action that uses the whitelistingJson body parser.
-    def fakeAction: Action[JsValue] = Action(BodyParsers.whitelistingJson) { request =>
+    def fakeAction: Action[JsValue] = Action(BodyParsers.whitelistingJson(includeUnsafe = true)) { request =>
       Ok(request.body)
     }
 
@@ -122,12 +149,39 @@ class BodyParsersSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTable
       // And the status is 200 OK.
       status(result)(defaultTimeout) must_=== OK
     }
+
+    // format: OFF
+    "cleaned JSON values with" in new WithApplication {
+      "description"                  || "json"                                                       || "include unsafe" || "expected cleaned JSON"                                                    |>
+        "unsafe field added"         !! Json.parse("""{"id": 1, "name": "<script>Hack</script>"}""") !! false            !! """{"id":1,"name":""}"""                                                   |
+        "no unsafe field added"      !! Json.parse("""{"id": 1, "name": "<script>Hack</script>"}""") !! true             !! """{"id":1,"name":"","idUnsafe":1,"nameUnsafe":"<script>Hack</script>"}""" |> {
+        (description, json, includeUnsafe, expectedCleanedJson) => {
+              // format: ON
+              // Given a fake action that uses the whitelistingJson body parser.
+              def action: Action[JsValue] = Action(BodyParsers.whitelistingJson(includeUnsafe)) { request =>
+                Ok(Json.toJson(request.body))
+              }
+
+              // And a request with a JSON body with HTML tags.
+              val request = FakeRequest().withBody(json)
+
+              // When calling the fake action with the request.
+              val result = call(action, request)
+
+              // Then the response content must have the JSON body cleaned with expected result.
+              contentAsString(result)(defaultTimeout) must_=== expectedCleanedJson
+
+              // And the status is 200 OK.
+              status(result)(defaultTimeout) must_=== OK
+            }
+        }
+    }
   }
 
   "Parsing JSON to value with specific type after applying an unsafe white listing filter" should {
 
-    // Given a fake action that uses the whitelistingJsonUnSafe body parser.
-    def fakeAction: Action[MockTestModel] = Action(BodyParsers.whitelistingJsonUnsafe[MockTestModel]) { request =>
+    // Given a fake action that uses the whitelistingJsonUnSafeAs body parser.
+    def fakeAction: Action[MockTestModel] = Action(BodyParsers.whitelistingJsonUnsafeAs[MockTestModel](includeUnsafe = true)) { request =>
       Ok(Json.toJson(request.body))
     }
 
@@ -155,12 +209,39 @@ class BodyParsersSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTable
       // Then the status is 400 Bad Request.
       status(result)(defaultTimeout) must_=== BAD_REQUEST
     }
+
+    // format: OFF
+    "cleaned JSON values with" in new WithApplication {
+      "description"                  || "json"                                                       || "include unsafe" || "expected cleaned JSON"                                                    |>
+        "unsafe field added"         !! Json.parse("""{"id": 1, "name": "<script>Hack</script>"}""") !! false            !! """{"id":1,"name":""}"""                                                   |
+        "no unsafe field added"      !! Json.parse("""{"id": 1, "name": "<script>Hack</script>"}""") !! true             !! """{"id":1,"name":"","idUnsafe":1,"nameUnsafe":"<script>Hack</script>"}""" |> {
+        (description, json, includeUnsafe, expectedCleanedJson) => {
+              // format: ON
+              // Given a fake action that uses the whitelistingJsonUnsafeAs body parser.
+              def action: Action[JsValue] = Action(BodyParsers.whitelistingJsonUnsafeAs[JsValue](includeUnsafe)) { request =>
+                Ok(Json.toJson(request.body))
+              }
+
+              // And a request with a JSON body with HTML tags.
+              val request = FakeRequest().withBody(json)
+
+              // When calling the fake action with the request.
+              val result = call(action, request)
+
+              // Then the response content must have the JSON body cleaned with expected result.
+              contentAsString(result)(defaultTimeout) must_=== expectedCleanedJson
+
+              // And the status is 200 OK.
+              status(result)(defaultTimeout) must_=== OK
+            }
+        }
+    }
   }
 
   "Applying unsafe white list to remove unsafe HTML tags from the JSON body" should {
 
     // Given a fake action that uses the whitelistingJsonUnsafe body parser.
-    def fakeAction: Action[JsValue] = Action(BodyParsers.whitelistingJsonUnsafe) { request =>
+    def fakeAction: Action[JsValue] = Action(BodyParsers.whitelistingJsonUnsafe(includeUnsafe = true)) { request =>
       Ok(request.body)
     }
 
@@ -176,6 +257,33 @@ class BodyParsersSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTable
 
       // And the status is 200 OK.
       status(result)(defaultTimeout) must_=== OK
+    }
+
+    // format: OFF
+    "cleaned JSON values with" in new WithApplication {
+      "description"                  || "json"                                                       || "include unsafe" || "expected cleaned JSON"                                                    |>
+        "unsafe field added"         !! Json.parse("""{"id": 1, "name": "<script>Hack</script>"}""") !! false            !! """{"id":1,"name":""}"""                                                   |
+        "no unsafe field added"      !! Json.parse("""{"id": 1, "name": "<script>Hack</script>"}""") !! true             !! """{"id":1,"name":"","idUnsafe":1,"nameUnsafe":"<script>Hack</script>"}""" |> {
+        (description, json, includeUnsafe, expectedCleanedJson) => {
+              // format: ON
+              // Given a fake action that uses the whitelistingJsonUnsafe body parser.
+              def action: Action[JsValue] = Action(BodyParsers.whitelistingJsonUnsafe(includeUnsafe)) { request =>
+                Ok(Json.toJson(request.body))
+              }
+
+              // And a request with a JSON body with HTML tags.
+              val request = FakeRequest().withBody(json)
+
+              // When calling the fake action with the request.
+              val result = call(action, request)
+
+              // Then the response content must have the JSON body cleaned with expected result.
+              contentAsString(result)(defaultTimeout) must_=== expectedCleanedJson
+
+              // And the status is 200 OK.
+              status(result)(defaultTimeout) must_=== OK
+            }
+        }
     }
   }
 }
