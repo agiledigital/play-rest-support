@@ -15,7 +15,6 @@ import play.api.mvc.Results._
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ ExecutionContext, Future }
-import scalaz.{ -\/, \/, \/- }
 
 /**
   * Encapsulates an optional result T and any messages that were produced while
@@ -95,23 +94,6 @@ object JsonApiResponse {
     errorOrResponse match {
       case Left(errorMessage) => buildResponseForErrorsOrSuccess[String](successMessage, Left(Seq(errorMessage)))
       case Right(successObject) => buildResponseForErrorsOrSuccess(successMessage, Right(successObject))
-    }
-  }
-
-  /**
-    * Builds the response for the supplied Scalaz \/ (disjunction).
-    *
-    * If a -\/(errorMessage) is supplied then a BadRequest with the error message (as JSON response) is built.
-    *
-    * If a \/-(successObject) is returned then an Ok with the supplied
-    * success message and success object (as a JSON response) is built.
-    *
-    * An implicit (or explicit) JSON Writes must be available for the success object.
-    */
-  def buildResponseForErrorOrSuccess[A](successMessage: String, errorOrResponse: \/[String, A])(implicit tjs: Writes[A]): Result = {
-    errorOrResponse match {
-      case -\/(errorMessage) => buildResponseForErrorsOrSuccess[String](successMessage, Left(Seq(errorMessage)))
-      case \/-(successObject) => buildResponseForErrorsOrSuccess(successMessage, Right(successObject))
     }
   }
 

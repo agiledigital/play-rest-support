@@ -24,8 +24,7 @@ lazy val commonSettings = Seq(
   ),
   libraryDependencies ++= Seq(
     "com.typesafe.play" %% "play" % PlayVersion % Provided,
-    "org.jsoup" % "jsoup" % "1.10.3",
-    "org.scalaz" %% "scalaz-core" % "7.1.14"
+    "org.jsoup" % "jsoup" % "1.10.3"
   ),
   // Disable scaladoc generation in dist.
   sources in(Compile, doc) := Seq.empty,
