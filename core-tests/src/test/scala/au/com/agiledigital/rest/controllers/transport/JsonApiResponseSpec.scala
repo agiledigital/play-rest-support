@@ -1,14 +1,13 @@
 package au.com.agiledigital.rest.controllers.transport
 
 import au.com.agiledigital.rest.tests.BaseSpec
-import org.specs2.concurrent.ExecutionEnv
 import org.specs2.matcher.DataTables
 import play.api.libs.json.Json
 
 /**
   * Tests for [[JsonApiResponse]].
   */
-class JsonApiResponseSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTables {
+class JsonApiResponseSpec extends BaseSpec with DataTables {
   "JsonApiResponse writes" should {
     // format: OFF
      "remove unsafe HTML tags from JSON API responses" ||

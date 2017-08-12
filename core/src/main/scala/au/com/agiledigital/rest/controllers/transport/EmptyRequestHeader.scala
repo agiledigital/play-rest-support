@@ -1,33 +1,31 @@
 package au.com.agiledigital.rest.controllers.transport
 
+import java.net.InetAddress
 import java.security.cert.X509Certificate
 
+import play.api.libs.typedmap.TypedMap
+import play.api.mvc.request.{ RemoteConnection, RequestTarget }
 import play.api.mvc.{ Headers, RequestHeader }
 
 /**
   * Empty request header implementation.
   */
 class EmptyRequestHeader extends RequestHeader {
+  override def connection: RemoteConnection = new RemoteConnection {
+    override def remoteAddress: InetAddress = InetAddress.getByName("")
 
-  override def id: Long = 1L
+    override def secure: Boolean = false
 
-  override def secure: Boolean = false
-
-  override def uri: String = ""
-
-  override def remoteAddress: String = ""
-
-  override def queryString: Map[String, Seq[String]] = Map.empty
+    override def clientCertificateChain: Option[Seq[X509Certificate]] = None
+  }
 
   override def method: String = ""
 
-  override def headers: Headers = Headers()
-
-  override def path: String = ""
+  override def target: RequestTarget = RequestTarget("", "", Map.empty)
 
   override def version: String = ""
 
-  override def tags: Map[String, String] = Map.empty
+  override def headers: Headers = Headers()
 
-  override def clientCertificateChain: Option[Seq[X509Certificate]] = None
+  override def attrs: TypedMap = TypedMap.empty
 }

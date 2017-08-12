@@ -3,7 +3,7 @@ package au.com.agiledigital.rest.controllers
 import play.api.Logger
 import play.api.mvc.{ Action, BodyParser, Request, Result }
 
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 
 /**
   * Contains common Actions (and future ActionFunctions).
@@ -22,6 +22,8 @@ object Actions {
       Logger.error(s"Calling temporary action [${request.path}].")
       action(request)
     }
+
+    override def executionContext: ExecutionContext = action.executionContext
   }
 
 }

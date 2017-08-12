@@ -1,9 +1,8 @@
 package au.com.agiledigital.rest.controllers.caching
 
 import org.joda.time.DateTimeUtils
-import play.api.http.HeaderNames._
-import play.api.http.Status._
 import play.api.mvc.Action
+import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.FiniteDuration
@@ -11,7 +10,7 @@ import scala.concurrent.duration.FiniteDuration
 /**
   * Provides an action builder that marks a response as cacheable.
   */
-trait CacheableResponses {
+trait CacheableResponses extends BaseController {
 
   /**
     * Builds a wrapper action around the supplied action that sets the cache headers to effect the requested degree

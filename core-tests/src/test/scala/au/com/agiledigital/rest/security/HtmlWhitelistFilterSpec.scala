@@ -1,13 +1,12 @@
 package au.com.agiledigital.rest.security
 
 import au.com.agiledigital.rest.tests.BaseSpec
-import org.specs2.concurrent.ExecutionEnv
 import org.specs2.matcher.DataTables
 
 /**
   * Contains unit tests for the [[HtmlWhitelistFilter]].
   */
-class HtmlWhitelistFilterSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTables {
+class HtmlWhitelistFilterSpec extends BaseSpec with DataTables {
   "HtmlWhitelistFilter remove unsafe" should {
     // format: OFF
     "remove unsafe HTML tags from the input string" ||

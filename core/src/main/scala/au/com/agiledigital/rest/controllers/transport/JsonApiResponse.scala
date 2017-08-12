@@ -7,7 +7,6 @@ import au.com.agiledigital.rest.json.ThrowableWrites._
 import au.com.agiledigital.rest.security.HtmlWhitelistFilter
 import play.api.Logger
 import play.api.data.FormError
-import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
@@ -16,8 +15,6 @@ import play.api.mvc.Results._
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ ExecutionContext, Future }
-import scala.language.implicitConversions
-import scalaz.{ -\/, \/, \/- }
 
 /**
   * Encapsulates an optional result T and any messages that were produced while
@@ -101,23 +98,6 @@ object JsonApiResponse {
   }
 
   /**
-    * Builds the response for the supplied Scalaz \/ (disjunction).
-    *
-    * If a -\/(errorMessage) is supplied then a BadRequest with the error message (as JSON response) is built.
-    *
-    * If a \/-(successObject) is returned then an Ok with the supplied
-    * success message and success object (as a JSON response) is built.
-    *
-    * An implicit (or explicit) JSON Writes must be available for the success object.
-    */
-  def buildResponseForErrorOrSuccess[A](successMessage: String, errorOrResponse: \/[String, A])(implicit tjs: Writes[A]): Result = {
-    errorOrResponse match {
-      case -\/(errorMessage) => buildResponseForErrorsOrSuccess[String](successMessage, Left(Seq(errorMessage)))
-      case \/-(successObject) => buildResponseForErrorsOrSuccess(successMessage, Right(successObject))
-    }
-  }
-
-  /**
     * Builds the response for the supplied Either.
     *
     * If a Left(Seq(errorMessage)) is supplied then a BadRequest with the error messages (as JSON response) is built.
@@ -186,7 +166,7 @@ object JsonApiResponse {
     * @param errors The validation errors to include in the response.
     * @return The Bad Request API response.
     */
-  def badRequestResponse(message: String, errors: Seq[(JsPath, Seq[ValidationError])]): Result = {
+  def badRequestResponse(message: String, errors: Seq[(JsPath, Seq[JsonValidationError])]): Result = {
     BadRequest(Json.toJson(JsonApiResponse[String](None, Message(message, MessageLevel.Error, JsError.toJson(errors)))))
   }
 
@@ -197,7 +177,7 @@ object JsonApiResponse {
     * @return The Bad Request API response.
     */
   def badRequestResponseForForm(message: String, errors: Seq[FormError]): Result = {
-    badRequestResponse(message, errors.map(error => JsPath() -> Seq(ValidationError(error.messages))))
+    badRequestResponse(message, errors.map(error => JsPath() -> Seq(JsonValidationError(error.messages))))
   }
 
   /**
@@ -206,7 +186,7 @@ object JsonApiResponse {
     * @param errors Any errors that were found in the JSON
     * @return A 400 'Bad Result' Successful Future
     */
-  def badRequestApiResponse(message: String, errors: Seq[(JsPath, Seq[ValidationError])]): Future[Result] = {
+  def badRequestApiResponse(message: String, errors: Seq[(JsPath, Seq[JsonValidationError])]): Future[Result] = {
     Future.successful(badRequestResponse(message, errors))
   }
 
