@@ -1,14 +1,14 @@
 import org.scalastyle.sbt.ScalastylePlugin._
 
-val Specs2Version = "3.6.5"
+val Specs2Version = "3.9.1"
 
-val PlayVersion = "2.5.1"
+val PlayVersion = "2.6.2"
 
 lazy val compileScalastyle = taskKey[Unit]("compileScalastyle")
 
 lazy val commonSettings = Seq(
   organization := "au.com.agiledigital",
-  scalaVersion := "2.11.8",
+  scalaVersion := "2.12.3",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint:unchecked", "-encoding", "UTF-8"),
   scalacOptions ++= Seq(
     "-deprecation", // Emit warning and location for usages of deprecated APIs.
@@ -24,8 +24,8 @@ lazy val commonSettings = Seq(
   ),
   libraryDependencies ++= Seq(
     "com.typesafe.play" %% "play" % PlayVersion % Provided,
-    "org.jsoup" % "jsoup" % "1.8.3",
-    "org.scalaz" %% "scalaz-core" % "7.1.3"
+    "org.jsoup" % "jsoup" % "1.10.3",
+    "org.scalaz" %% "scalaz-core" % "7.1.14"
   ),
   // Disable scaladoc generation in dist.
   sources in(Compile, doc) := Seq.empty,
@@ -47,13 +47,13 @@ lazy val commonSettings = Seq(
         Wart.TryPartial,
         Wart.Var,
         Wart.OptionPartial,
-        Wart.ListOps,
         Wart.EitherProjectionPartial,
-        Wart.Any2StringAdd,
         Wart.AsInstanceOf,
         Wart.ExplicitImplicitTypes,
         Wart.MutableDataStructures,
         Wart.Return,
+        Wart.StringPlusAny,
+        Wart.TraversableOps,
         Wart.AsInstanceOf,
         Wart.IsInstanceOf)
 ) ++ Formatting.formattingSettings

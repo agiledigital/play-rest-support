@@ -4,8 +4,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import au.com.agiledigital.rest.tests.{ BaseSpec }
-import com.sun.jna.platform.win32.Guid.GUID
+import au.com.agiledigital.rest.tests.BaseSpec
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.matcher.DataTables
 import org.specs2.specification.After
@@ -14,7 +13,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
 import scala.concurrent.{ Await, Future }
-import scala.language.postfixOps
 
 /**
   * Contains tests for the [[ExpiresFilter]].

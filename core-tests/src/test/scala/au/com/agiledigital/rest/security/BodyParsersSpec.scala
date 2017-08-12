@@ -3,10 +3,11 @@ package au.com.agiledigital.rest.security
 import au.com.agiledigital.rest.tests.BaseSpec
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.matcher.DataTables
+import play.api.Application
 import play.api.libs.json._
 import play.api.test.Helpers._
 import play.api.mvc.Results._
-import play.api.mvc.Action
+import play.api.mvc.{ Action, ControllerComponents }
 import play.api.test.FakeRequest
 import play.api.test.WithApplication
 
@@ -51,7 +52,7 @@ class BodyParsersSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTable
     )
 
     // format: OFF
-    "clean JSON values using the specified HTML whitelist" ||
+    "clean JSON values using the specified HTML whitelist" in new WithApplication {
       "description"                       || "json"               || "expected clean all" || "expected clean unsafe"          |>
       "leave non-HTML strings alone"      !! JsString("bar baz")  !! JsString("bar baz")  !! JsString("bar baz")              |
       "remove HTML elements"              !! jsString             !! JsString("bar baz")  !! JsString("<span>bar</span> baz") |
@@ -61,19 +62,30 @@ class BodyParsersSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTable
       "leave JSON null alone"             !! JsNull               !! JsNull               !! JsNull                           |
       "leave JSON bools alone"            !! JsBoolean(false)     !! JsBoolean(false)     !! JsBoolean(false)                 |> {
       (description, json, expectedCleanAll, expectedUnsafe) => {
-            // format: ON
-            BodyParsers.clean(json) must beEqualTo(expectedCleanAll)
+              // format: ON
+              val bodyParsers = new BodyParsers {
+                override protected def controllerComponents: ControllerComponents = app.injector.instanceOf[ControllerComponents]
+              }
 
-            BodyParsers.cleanUnsafe(json) must beEqualTo(expectedUnsafe)
-          }
-      }
+              bodyParsers.clean(json) must beEqualTo(expectedCleanAll)
+
+              bodyParsers.cleanUnsafe(json) must beEqualTo(expectedUnsafe)
+            }
+        }
+    }
   }
 
   "Parsing JSON to value with specific type after applying a full clean white listing filter" should {
 
     // Given a fake action that uses the whitelistingJson body parser with type MockTestModel.
-    def fakeAction: Action[MockTestModel] = Action(BodyParsers.whitelistingJson[MockTestModel]) { request =>
-      Ok(Json.toJson(request.body))
+    def fakeAction(implicit app: Application): Action[MockTestModel] = {
+      val controller = new BodyParsers {
+        override protected def controllerComponents: ControllerComponents = app.injector.instanceOf[ControllerComponents]
+      }
+
+      controller.Action(controller.whitelistingJson[MockTestModel]) { request =>
+        Ok(Json.toJson(request.body))
+      }
     }
 
     "clean the JSON values and validate the JsValue based on the type" in new WithApplication {
@@ -105,8 +117,14 @@ class BodyParsersSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTable
   "Applying a full clean white listing filter to a JSON body" should {
 
     // Given a fake action that uses the whitelistingJson body parser.
-    def fakeAction: Action[JsValue] = Action(BodyParsers.whitelistingJson) { request =>
-      Ok(request.body)
+    def fakeAction(implicit app: Application): Action[JsValue] = {
+      val controller = new BodyParsers {
+        override protected def controllerComponents: ControllerComponents = app.injector.instanceOf[ControllerComponents]
+      }
+
+      controller.Action(controller.whitelistingJson) { request =>
+        Ok(request.body)
+      }
     }
 
     "clean the JSON values" in new WithApplication {
@@ -127,8 +145,14 @@ class BodyParsersSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTable
   "Parsing JSON to value with specific type after applying an unsafe white listing filter" should {
 
     // Given a fake action that uses the whitelistingJsonUnSafe body parser.
-    def fakeAction: Action[MockTestModel] = Action(BodyParsers.whitelistingJsonUnsafe[MockTestModel]) { request =>
-      Ok(Json.toJson(request.body))
+    def fakeAction(implicit app: Application): Action[MockTestModel] = {
+      val controller = new BodyParsers {
+        override protected def controllerComponents: ControllerComponents = app.injector.instanceOf[ControllerComponents]
+      }
+
+      controller.Action(controller.whitelistingJsonUnsafe[MockTestModel]) { request =>
+        Ok(Json.toJson(request.body))
+      }
     }
 
     "clean the JSON values with safe HTML tags remain and validate the JsValue based on the type" in new WithApplication {
@@ -160,8 +184,14 @@ class BodyParsersSpec(implicit ev: ExecutionEnv) extends BaseSpec with DataTable
   "Applying unsafe white list to remove unsafe HTML tags from the JSON body" should {
 
     // Given a fake action that uses the whitelistingJsonUnsafe body parser.
-    def fakeAction: Action[JsValue] = Action(BodyParsers.whitelistingJsonUnsafe) { request =>
-      Ok(request.body)
+    def fakeAction(implicit app: Application): Action[JsValue] = {
+      val controller = new BodyParsers {
+        override protected def controllerComponents: ControllerComponents = app.injector.instanceOf[ControllerComponents]
+      }
+
+      controller.Action(controller.whitelistingJsonUnsafe) { request =>
+        Ok(request.body)
+      }
     }
 
     "clean the JSON values" in new WithApplication {

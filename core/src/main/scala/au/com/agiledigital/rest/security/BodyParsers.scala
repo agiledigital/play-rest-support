@@ -2,15 +2,15 @@ package au.com.agiledigital.rest.security
 
 import au.com.agiledigital.rest.controllers.transport.JsonApiResponse
 import play.api.libs.json.{ JsValue, Reads }
-import play.api.mvc.{ BodyParser, Result }
-import play.api.mvc.BodyParsers.parse
+import play.api.mvc.{ BaseController, BodyParser, Result }
 
 import scala.concurrent.ExecutionContext
 
 /**
   * Security focused body parsers.
   */
-object BodyParsers {
+trait BodyParsers extends BaseController {
+
   /**
     * A JSON body parser that applies HTML whitelisting rules to JSON strings and validate based on the type, this removes all HTML tags.
     */
